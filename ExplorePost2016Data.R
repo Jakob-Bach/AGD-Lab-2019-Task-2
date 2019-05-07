@@ -49,6 +49,21 @@ datasetQualityTable <- rbindlist(lapply(1:length(datasetQualities), function(i) 
   return(result)
 }), fill = TRUE)
 
+#### Explore data ####
+
+# Completeness of dataset qualities
+
+missingValueTable <- data.table(DatasetQuality = names(datasetQualityTable),
+    NumMissing = sapply(datasetQualityTable, function(x) sum(is.na(x))))
+missingValueTable[NumMissing == 0, DatasetQuality]
+missingValueTable[NumMissing > 0.5 * nrow(datasetQualityTable)]
+
+# Try additional meta-feature generation with [mfe]
+
+baseDataset <- OpenML::getOMLDataSet(datasetQualityTable$data.id[1])
+mfeMetaFeatures <- mfe::metafeatures(formula = as.formula(
+    paste0(baseDataset$desc$default.target.attribute, " ~ .")), data = baseDataset$data)
+
 #### Try meta-models ####
 
 # Exclude some meta-features, focus on one meta-target
