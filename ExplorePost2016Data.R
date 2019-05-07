@@ -26,7 +26,7 @@ runTable <- rbindlist(lapply(runs, function(run) {
     classifier = run$flow.name
   )
   performanceInfo <- run$output.data$evaluations
-  performanceInfo <- performanceInfo[is.na(performanceInfo$fold), c("name", "value")]
+  performanceInfo <- performanceInfo[is.na(performanceInfo$fold), c("name", "value")] # only overall performance, not fold performance
   result[performanceInfo$name] <- performanceInfo$value
   return(result)
 }), fill = TRUE)
@@ -37,7 +37,7 @@ datasetIds <- study$data$data.id # could also use runTable[, unique(data.id)]
 progressBar <- txtProgressBar(min = 0, max = length(datasetIds), style = 3)
 datasetQualities <- lapply(1:length(datasetIds), function(i) {
   setTxtProgressBar(progressBar, value = i)
-  return(OpenML::getOMLDataSetQualities(study$data$data.id[[i]], verbosity = 0))
+  return(OpenML::getOMLDataSetQualities(study$data$data.id[i], verbosity = 0))
 })
 close(progressBar)
 names(datasetQualities) <- datasetIds
@@ -56,25 +56,25 @@ nonLandmarkerFeatures <- setdiff(names(datasetQualityTable),
     grep("ErrRate|Kappa|AUC", names(datasetQualityTable), value = TRUE))
 metaData <- merge(runTable[, .(data.id, dataset, classifier, predictive_accuracy)],
                   datasetQualityTable[, mget(nonLandmarkerFeatures)])
+setnames(metaData, "predictive_accuracy", "target")
 metaData[, classifier := as.factor(classifier)]
-metaData[, c("data.id", "dataset") := NULL]
 
-# Train-test split
+# Train-test split (considering base datasets)
 
 set.seed(25)
-trainIdx <- sample(1:nrow(metaData), size = round(0.8 * nrow(metaData)), replace = FALSE)
-trainData <- metaData[trainIdx]
-testData <- metaData[-trainIdx]
+trainDatasetIds <- metaData[, sample(unique(data.id), size = round(0.8 * uniqueN(data.id)), replace = FALSE)]
+trainData <- metaData[data.id %in% trainDatasetIds, -c("data.id", "dataset")]
+testData <- metaData[!(data.id %in% trainDatasetIds), -c("data.id", "dataset")]
 
 # Baseline: Guess average train performace
 
-mean(abs(testData$predictive_accuracy - trainData[, mean(predictive_accuracy)]))
+mean(abs(testData$target - trainData[, mean(target)]))
 
 # Decision tree [rpart]
 
-rpartModel <- rpart::rpart(formula = predictive_accuracy ~ ., data = trainData)
+rpartModel <- rpart::rpart(formula = target ~ ., data = trainData)
 testPrediction <- predict(rpartModel, newdata = testData)
-mean(abs(testData$predictive_accuracy - testPrediction))
+mean(abs(testData$target - testPrediction))
 
 rpartModel$variable.importance
 rpart.plot::rpart.plot(rpartModel)
@@ -83,18 +83,18 @@ rpart.plot::rpart.plot(rpartModel)
 
 preprocModel <- caret::preProcess(trainData, method = "medianImpute") # matrix conversion else deletes NA row
 xgbTrainPredictors <- Matrix::sparse.model.matrix(~ .,data =
-    predict(preprocModel, trainData)[, -"predictive_accuracy"])[, -1]
+    predict(preprocModel, trainData)[, -"target"])[, -1]
 xgbTrainData <- xgboost::xgb.DMatrix(data = xgbTrainPredictors,
-    label = trainData$predictive_accuracy)
+    label = trainData$target)
 xgbTestPredictors <- Matrix::sparse.model.matrix(~ ., data =
-    predict(preprocModel, testData)[, -"predictive_accuracy"])[, -1]
+    predict(preprocModel, testData)[, -"target"])[, -1]
 xgbTestData <- xgboost::xgb.DMatrix(data = xgbTestPredictors,
-    label = testData$predictive_accuracy)
+    label = testData$target)
 xgbModel <- xgboost::xgb.train(data = xgbTrainData, nrounds = 50, verbose = 2,
     watchlist = list(train = xgbTrainData, test = xgbTestData),
     params = list(objective = "reg:linear", nthread = 4))
 testPrediction <- predict(xgbModel, newdata = xgbTestPredictors)
-mean(abs(testData$predictive_accuracy - testPrediction))
+mean(abs(testData$target - testPrediction))
 
 ggplot(data = melt(data = xgbModel$evaluation_log, id.vars = "iter")) +
   geom_line(aes(x = iter, y = value, color = variable)) + ylab("RSME")
