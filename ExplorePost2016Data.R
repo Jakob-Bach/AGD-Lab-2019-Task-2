@@ -51,6 +51,9 @@ datasetQualityTable <- rbindlist(lapply(1:length(datasetQualities), function(i) 
 
 #### Explore data ####
 
+# Completeness of runs
+runTable[, .(RunsPerDataset = .N), by = data.id][, .N , by = RunsPerDataset]
+
 # Completeness of dataset qualities
 
 missingValueTable <- data.table(DatasetQuality = names(datasetQualityTable),
@@ -66,6 +69,8 @@ mfeMetaFeatures <- mfe::metafeatures(formula = as.formula(
 
 #### Try meta-models ####
 
+# Approach 1: Predict base performance (feature selection only treated as additional classifiers)
+
 # Exclude some meta-features, focus on one meta-target
 nonLandmarkerFeatures <- setdiff(names(datasetQualityTable),
     grep("ErrRate|Kappa|AUC", names(datasetQualityTable), value = TRUE))
@@ -73,6 +78,23 @@ metaData <- merge(runTable[, .(data.id, dataset, classifier, predictive_accuracy
                   datasetQualityTable[, mget(nonLandmarkerFeatures)])
 setnames(metaData, "predictive_accuracy", "target")
 metaData[, classifier := as.factor(classifier)]
+
+# Approach 2: Predict difference FS/no FS
+
+metaData <- runTable[, .(data.id, dataset, classifier, area_under_roc_curve)]
+setnames(metaData, "area_under_roc_curve", "target")
+metaData[, FeaturesSelected := paste0("Selected_", grepl("Selected", classifier))]
+metaData[, classifier := gsub("\\([0-9]+\\)", "", classifier)] # simplify naming
+metaData[, classifier := gsub("weka.", "", classifier)]
+metaData[, classifier := gsub("AttributeSelectedClassifier_CfsSubsetEval_BestFirst_", "", classifier)]
+metaData[, classifier := as.factor(classifier)]
+metaData <- dcast(metaData, dataset + data.id + classifier ~ FeaturesSelected, value.var = "target")
+metaData[, target := Selected_TRUE - Selected_FALSE]
+metaData[, c("Selected_TRUE", "Selected_FALSE") := NULL]
+
+nonLandmarkerFeatures <- setdiff(names(datasetQualityTable),
+    grep("ErrRate|Kappa|AUC", names(datasetQualityTable), value = TRUE))
+metaData <- merge(metaData, datasetQualityTable[, mget(nonLandmarkerFeatures)], by = "data.id")
 
 # Train-test split (considering base datasets)
 
