@@ -26,14 +26,22 @@ metaData <- fread("https://ndownloader.figshare.com/files/10462315")
 
 #### Try meta-models ####
 
-metaData[, c("accuracy", "brier", "runtime", "scimark", "data_id") := NULL]
-setnames(metaData, old = "auc", new = "target")
+metaData[, c("accuracy", "brier", "auc", "scimark") := NULL]
+setnames(metaData, old = "runtime", new = "target")
 
 # Train-test split (considering base datasets)
 
 set.seed(25)
+datasetIds <- metaData[, unique(data_id)]
+datasetTrainIds <- sample(datasetIds, size = round(0.8 * length(datasetIds)), replace = FALSE)
+trainData <- metaData[data_id %in% datasetTrainIds, -"data_id"]
+testData <- metaData[!(data_id %in% datasetTrainIds), -"data_id"]
+
+# Train-test split (ignoring base datasets)
+
+set.seed(25)
 trainIdx <- metaData[, sample(1:.N, size = round(0.8 * .N), replace = FALSE)]
-trainData <- metaData[trainIdx]
-testData <- metaData[-trainIdx]
+trainData <- metaData[trainIdx, -"data_id"]
+testData <- metaData[-trainIdx, -"data_id"]
 
 # Now the models in "ExplorePost2016Data.R" can be used
