@@ -11,6 +11,16 @@ runs <- lapply(1:length(runIds), function(i) {
   setTxtProgressBar(progressBar, value = i)
   return(OpenML::getOMLRun(study$runs$run.id[i], verbosity = 0))
 })
+# library(foreach) # parallel version
+# showProgress <- function(n) setTxtProgressBar(progressBar, n)
+# computingCluster <- parallel::makeCluster(parallel::detectCores())
+# doSNOW::registerDoSNOW(computingCluster)
+# runs <- foreach(i = 1:length(runIds), .packages = "OpenML",
+#   .options.snow = list(progress = showProgress)) %dopar% {
+#     setTxtProgressBar(progressBar, value = i)
+#     return(OpenML::getOMLRun(runIds[i], verbosity = 0))
+# }
+# parallel::stopCluster(computingCluster)
 close(progressBar)
 names(runs) <- runIds
 saveRDS(runs, "data/post2016_runs.rds")
