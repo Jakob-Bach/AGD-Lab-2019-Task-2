@@ -26,7 +26,7 @@ metaData <- fread("https://ndownloader.figshare.com/files/10462315")
 
 #### Try meta-models ####
 
-metaData[, c("accuracy", "brier", "auc", "scimark") := NULL]
+metaData[, c("accuracy", "brier", "auc") := NULL]
 setnames(metaData, old = "runtime", new = "target")
 
 # Train-test split (considering base datasets)

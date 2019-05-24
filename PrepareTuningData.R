@@ -2,7 +2,7 @@ library(data.table)
 
 metaData <- fread("https://ndownloader.figshare.com/files/10462315")
 
-metaData[, c("accuracy", "brier", "auc", "scimark") := NULL]
+metaData[, c("accuracy", "brier", "auc") := NULL]
 setnames(metaData, old = "runtime", new = "target")
 metaData <- metaData[target > 1]
 
