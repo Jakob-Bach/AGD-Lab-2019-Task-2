@@ -29,11 +29,11 @@ for (truthFileName in truthFiles) {
   if (ncol(prediction) != ncol(groundTruth)) {
     stop("Number of columns wrong (might be because of row names).")
   }
-  if (any(colnames(prediction) != colnames(groundTruth))) {
+  if (any(sort(colnames(prediction)) != sort(colnames(groundTruth)))) {
     stop("Column name wrong (quoted or wrong string).")
   }
   if (any(grepl("\"", prediction$classifier))) {
-    stop("Colum values quoted.")
+    stop("Column values quoted.")
   }
   if (!is.numeric(prediction$target)) {
     stop("Wrong prediction type.")
