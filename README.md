@@ -1,9 +1,11 @@
 # Task 2 of the AGD Lab Course 2019
 
 The code is written in R.
-The `data.table` package is required.
+The packages `data.table` and `OpenML` are required for the base functionality (preparing meta-datasets, creating data splits, creating demo submissions and scoring solutions).
+Further packages are needed when training more sophisticated models and for additional meta-feature extraction.
 
-`CompareTextFiles.R` can be used to determine if submitted prediction files and reproduced prediction files are equivalent.
+- `CompareTextFiles.R` can be used to determine if submitted prediction files and reproduced prediction files are equivalent.
+- `AddMFEMetaFeatures.R` downloads all `OpenML` base datasets of a (CSV-stored) meta-dataset and computes additional meta-features with `mfe`, storing the enhanced meta-dataset again as CSV. `doSNOW` and `foreach` are used for parallelization.
 
 **Version info**: The split data for the feature selection task (week 1-3) have been created with `R 3.5.3`, for week 4 and the tuning task with `R 3.6.0`.
 This matters because the sampling function has been changed in R 3.6.0 (see the [NEWS on CRAN](https://cran.r-project.org/doc/manuals/r-release/NEWS.html) and `?RNGkind` in R) and therefore you get different results with R >= 3.6.0, even if the random seed is the same.
