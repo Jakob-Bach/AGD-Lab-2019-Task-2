@@ -21,6 +21,7 @@ On OpenML, this is [study 15](https://www.openml.org/s/15).
 - `SplitFSData` creates splits for the students, similar to the DMC task. Currently these are cross-validation splits making sure that all entries belonging to the same base dataset go into the same fold.
 - `CreateFSDemoSubmission` creates valid submission files using a very simple baseline: always predicting zero difference between feature selection and not.
 - `ScoreForFSData` reads in prediction files from a directory, does some sanity checks and then computes the RSME regarding the ground truth.
+- `CreateFSXgboostSubmission` uses an `xgboost` model without any hyperparameter tuning, having median imputation (from `caret`) as the only pre-processing step.
 
 ## Meta-learning for Hyperparameter Tuning
 
