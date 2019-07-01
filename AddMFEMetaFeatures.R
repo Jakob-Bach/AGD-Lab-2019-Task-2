@@ -1,9 +1,10 @@
 library(data.table)
 
-IN_FILE <- "data/post2016_metaData.csv"
-OUT_FILE <- "data/post2016_metaData_enhanced.csv"
-ID_COL <- "data.id" # where is the OpenML dataset id stored?
+IN_FILE <- "data/kuhn2018_metaData.csv"
+OUT_FILE <- "data/kuhn2018_metaData_enhanced.csv"
+ID_COL <- "data_id" # where is the OpenML dataset id stored?
 
+cat("Start time:", as.character(Sys.time()), "\n")
 OpenML::setOMLConfig(apikey = "c1994bdb7ecb3c6f3c8f3b35f4b47f1f") # read-only demo key
 metaData <- fread(IN_FILE)
 
@@ -48,3 +49,4 @@ close(progressBar)
 
 metaData <- merge(metaData, mfeTable, by = ID_COL, all.x = TRUE)
 fwrite(metaData, file = OUT_FILE, quote = FALSE)
+cat("End time:", as.character(Sys.time()), "\n")
