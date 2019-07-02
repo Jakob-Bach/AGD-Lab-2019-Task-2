@@ -36,6 +36,7 @@ for (inputTestFile in list.files(inputPath, pattern = "kuhn2018-test-[0-9]+\\.cs
 
   # Predict
   solution <- data.table(target = predict(xgbModel, newdata = xgbTestPredictors))
+  solution[ target < 1, target := 1]
   numberString <- regmatches(inputTestFile, regexpr("[0-9]+.csv$", inputTestFile))
   fwrite(solution, file = paste0(outputPath, "Slytherin-", dateString, "-prediction-", numberString),
       quote = FALSE)
