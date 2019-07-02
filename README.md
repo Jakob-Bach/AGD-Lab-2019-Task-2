@@ -5,7 +5,8 @@ The packages `data.table` and `OpenML` are required for the base functionality (
 Further packages are needed when training more sophisticated models and for additional meta-feature extraction.
 
 - `CompareTextFiles.R` can be used to determine if submitted prediction files and reproduced prediction files are equivalent.
-- `AddMFEMetaFeatures.R` downloads all `OpenML` base datasets of a (CSV-stored) meta-dataset and computes additional meta-features with `mfe`, storing the enhanced meta-dataset again as CSV. `doSNOW` and `foreach` are used for parallelization.
+- `AddMFEMetaFeatures.R` downloads all `OpenML` base datasets of (CSV-stored) meta-datasets and computes additional meta-features with `mfe`, storing the enhanced meta-datasets again as CSV. `doSNOW` and `foreach` are used for parallelization.
+- `AddOpenMLMetaFeatures.R` adds all `OpenML` base dataset qualities to meta-datasets, storing the enhanced meta-datasets again as CSV.
 
 **Version info**: The split data for the feature selection task (week 1-3) have been created with `R 3.5.3`, for week 4 and the tuning task with `R 3.6.0`.
 This matters because the sampling function has been changed in R 3.6.0 (see the [NEWS on CRAN](https://cran.r-project.org/doc/manuals/r-release/NEWS.html) and `?RNGkind` in R) and therefore you get different results with R >= 3.6.0, even if the random seed is the same.
