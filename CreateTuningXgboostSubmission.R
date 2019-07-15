@@ -32,7 +32,7 @@ for (inputTestFile in list.files(inputPath, pattern = "kuhn2018-test-[0-9]+\\.cs
   xgbTrainData <- xgboost::xgb.DMatrix(data = xgbTrainPredictors, label = trainData$target)
   xgbTestPredictors <- Matrix::sparse.model.matrix(~ ., data = testData)[, -1]
   xgbModel <- xgboost::xgb.train(data = xgbTrainData, nrounds = 50,
-      params = list(objective = "reg:linear", nthread = 4))
+      params = list(objective = "reg:tweedie", nthread = 4))
 
   # Predict
   solution <- data.table(target = predict(xgbModel, newdata = xgbTestPredictors))
