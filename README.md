@@ -1,15 +1,20 @@
-# Task 2 of the AGD Lab Course 2019
+# Analyzing Big Data Laboratory Course 2019 - Task 2 (Meta-Learning)
 
-The code is written in R.
+This is the supervisor ("Team Slytherin") repo for task 2 of the ["Analyzing Big Data Laboratory Course"](http://dbis.ipd.kit.edu/2670.php) at KIT in 2019.
+Students worked on two meta-learning-related subtasks:
+
+- predicting (regressing) the difference in classification performance when using feature selection, given meta-data of the dataset
+- predicting the runtime of a classification algorithm, given its hyper-parameter configuration and meta-data of the dataset
+
+The repo provides files for creation of the meta-datasets, course-internal splitting, scoring, and demo submissions for that.
+
+The code is written in R versions 3.5.3 and 3.6.0, using recent versions of all required third-party packages at that time.
 The packages `data.table` and `OpenML` are required for the base functionality (preparing meta-datasets, creating data splits, creating demo submissions and scoring solutions).
 Further packages are needed when training more sophisticated models and for additional meta-feature extraction.
 
 - `CompareTextFiles.R` can be used to determine if submitted prediction files and reproduced prediction files are equivalent.
 - `AddMFEMetaFeatures.R` downloads all `OpenML` base datasets of (CSV-stored) meta-datasets and computes additional meta-features with `mfe`, storing the enhanced meta-datasets again as CSV. `doSNOW` and `foreach` are used for parallelization.
 - `AddOpenMLMetaFeatures.R` adds all `OpenML` base dataset qualities to meta-datasets, storing the enhanced meta-datasets again as CSV.
-
-**Version info**: The split data for the feature selection task (week 1-3) have been created with `R 3.5.3`, for week 4 and the tuning task with `R 3.6.0`.
-This matters because the sampling function has been changed in R 3.6.0 (see the [NEWS on CRAN](https://cran.r-project.org/doc/manuals/r-release/NEWS.html) and `?RNGkind` in R) and therefore you get different results with R >= 3.6.0, even if the random seed is the same.
 
 ## Meta-Learning for Feature Selection
 
